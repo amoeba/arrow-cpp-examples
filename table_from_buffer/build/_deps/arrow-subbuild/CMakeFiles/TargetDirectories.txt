@@ -1,3 +1,0 @@
-/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/CMakeFiles/arrow-populate.dir
-/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/CMakeFiles/edit_cache.dir
-/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/CMakeFiles/rebuild_cache.dir
