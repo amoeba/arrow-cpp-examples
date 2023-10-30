@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/CMakeFiles/arrow-populate"
+		},
+		{
+			"file" : "/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/CMakeFiles/arrow-populate.rule"
+		},
+		{
+			"file" : "/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/CMakeFiles/arrow-populate-complete.rule"
+		},
+		{
+			"file" : "/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-build.rule"
+		},
+		{
+			"file" : "/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-configure.rule"
+		},
+		{
+			"file" : "/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-download.rule"
+		},
+		{
+			"file" : "/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-install.rule"
+		},
+		{
+			"file" : "/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-mkdir.rule"
+		},
+		{
+			"file" : "/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-patch.rule"
+		},
+		{
+			"file" : "/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-test.rule"
+		},
+		{
+			"file" : "/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"arrow-populate"
+		],
+		"name" : "arrow-populate"
+	}
+}

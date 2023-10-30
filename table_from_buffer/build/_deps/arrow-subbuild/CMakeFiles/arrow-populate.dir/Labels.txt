@@ -1,0 +1,14 @@
+# Target labels
+ arrow-populate
+# Source files and their labels
+/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/CMakeFiles/arrow-populate
+/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/CMakeFiles/arrow-populate.rule
+/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/CMakeFiles/arrow-populate-complete.rule
+/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-build.rule
+/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-configure.rule
+/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-download.rule
+/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-install.rule
+/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-mkdir.rule
+/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-patch.rule
+/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-test.rule
+/Users/bryce/src/arrow-cpp-examples/table_from_buffer/build/_deps/arrow-subbuild/arrow-populate-prefix/src/arrow-populate-stamp/arrow-populate-update.rule
