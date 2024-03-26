@@ -22,6 +22,8 @@ arrow::Status RunMain(std::string path) {
 
   // Make our plan
   auto table_source_options = arrow::acero::TableSourceNodeOptions{table};
+
+  // FIXME: I don't think the args are right here.
   auto aggregate_options = arrow::acero::AggregateNodeOptions{
       /*aggregates=*/{{"hash_list", nullptr, "homeworld", "hash_list"}}};
 
