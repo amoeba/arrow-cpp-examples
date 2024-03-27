@@ -21,28 +21,39 @@ arrow::Status RunMain(std::string path) {
   ARROW_RETURN_NOT_OK(arrow_reader->ReadTable(&table));
 
   // Make our plan
-  auto table_source_options = arrow::acero::TableSourceNodeOptions{table};
+  // It reads cleaner to set up options separately first, so we do that
+  auto table_source_options =
+      arrow::acero::TableSourceNodeOptions{std::move(table), 1024};
 
-  // FIXME: I don't think the args are right here.
-  auto aggregate_options = arrow::acero::AggregateNodeOptions{
-      /*aggregates=*/{{"hash_list", nullptr, "homeworld", "hash_list"}}};
+  auto aggregate_options = arrow::acero::AggregateNodeOptions(
+      /*aggregates=*/{{"hash_list", nullptr, "species", "species_list"}},
+      {"homeworld"});
 
-  arrow::acero::Declaration plan = arrow::acero::Declaration::Sequence(
-      {{"source", std::move(table_source_options)},
+  // Then we create the plan
+  auto plan = arrow::acero::Declaration::Sequence(
+      {{"table_source", std::move(table_source_options)},
        {"aggregate", std::move(aggregate_options)}});
 
-  // Collect the result
+  // Collect the result as a Table
   std::shared_ptr<arrow::Table> response_table;
   ARROW_ASSIGN_OR_RAISE(response_table,
                         arrow::acero::DeclarationToTable(std::move(plan)));
 
+  // And print it
   std::cout << response_table->ToString() << std::endl;
 
   return arrow::Status::OK();
 }
 
 int main(int argc, char **argv) {
-  arrow::Status st = RunMain("/Users/bryce/Data/starwars.parquet");
+  if (argc < 2) {
+    std::cout << "Must specify filename. Usage `./example my.parquet`. Exiting."
+              << std::endl;
+
+    return -1;
+  }
+
+  arrow::Status st = RunMain(argv[1]);
 
   if (!st.ok()) {
     std::cerr << st << std::endl;

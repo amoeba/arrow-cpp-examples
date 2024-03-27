@@ -31,16 +31,94 @@ values_list: [[[1,2],[3,4],[5]]]
 
 ## Pre-requisites
 
-TODO
+- Modern C++ compiler toolchain
+- CMake
+- Likely a few system libraries, depending on your system
 
 ## Building
 
-TODO
+```sh
+mkdir build
+cd build
+cmake ..
+make
+```
 
 ## Running
 
-TODO
+```sh
+./example $SOME_PARQUET_FILE
+```
 
 ## Example Output
 
-TODO
+```sh
+$ ./example starwars.parquet
+homeworld: string
+species_list: list<item: string>
+  child 0, item: string
+----
+homeworld:
+  [
+    [
+      "Tatooine",
+      "Naboo",
+      "Alderaan",
+      "Stewjon",
+      "Eriadu",
+      "Kashyyyk",
+      "Corellia",
+      "Rodia",
+      "Nal Hutta",
+      "Bestine IV",
+      ...
+      "Serenno",
+      "Concord Dawn",
+      "Zolan",
+      "Ojom",
+      "Skako",
+      "Muunilinst",
+      "Shili",
+      "Umbara",
+      "Utapau",
+      "Kalee"
+    ]
+  ]
+species_list:
+  [
+    [
+      [
+        "Human",
+        "Droid",
+        "Human",
+        "Human",
+        "Human",
+        "Droid",
+        "Human",
+        "Human",
+        "Human",
+        "Human"
+      ],
+      [
+        "Droid",
+        "Human",
+        "Human",
+        "Gungan",
+        "Gungan",
+        "Gungan",
+        "Human",
+        "Human",
+        null,
+        null,
+        "Human"
+      ],
+      ...
+      [
+        "Pau'an"
+      ],
+      [
+        "Kaleesh"
+      ]
+    ]
+  ]
+```
