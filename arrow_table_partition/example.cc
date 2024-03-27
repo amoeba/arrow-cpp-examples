@@ -1,10 +1,13 @@
 #include <iostream>
+#include <memory>
+#include <unordered_map>
 
 #include "arrow/acero/exec_plan.h"
 #include "arrow/acero/options.h"
 #include "arrow/api.h"
 #include "arrow/compute/api.h"
 #include "arrow/io/api.h"
+#include "arrow/result.h"
 #include "parquet/arrow/reader.h"
 
 arrow::Status RunMain(std::string path) {
@@ -44,12 +47,32 @@ arrow::Status RunMain(std::string path) {
        {"aggregate", std::move(aggregate_options)}});
 
   // Collect the result as a Table
-  std::shared_ptr<arrow::Table> response_table;
-  ARROW_ASSIGN_OR_RAISE(response_table,
+  std::shared_ptr<arrow::Table> partitioned_table;
+  ARROW_ASSIGN_OR_RAISE(partitioned_table,
                         arrow::acero::DeclarationToTable(std::move(plan)));
 
-  // And print it
-  std::cout << response_table->ToString() << std::endl;
+  // And print the whole Tables
+  std::cout << partitioned_table->ToString() << std::endl;
+
+  // If we want, we can split the single Table into one Table per partition by
+  // taking k slices
+  std::unordered_map<std::string, std::shared_ptr<arrow::Table>> tables;
+  auto n_partitions = partitioned_table->GetColumnByName("homeworld")->length();
+  tables.reserve(n_partitions);
+
+  for (int i = 0; i < n_partitions; i++) {
+    // Get the key for this partition from the partitioned_table
+    ARROW_ASSIGN_OR_RAISE(auto key,
+                          partitioned_table->GetColumnByName("homeworld")
+                              ->chunk(0)
+                              ->GetScalar(i));
+    tables.insert({key->ToString(), partitioned_table->Slice(i, 1)});
+  }
+
+  // Print out our results
+  for (auto iter = tables.begin(); iter != tables.end(); ++iter) {
+    std::cout << iter->second->ToString() << std::endl;
+  }
 
   return arrow::Status::OK();
 }
