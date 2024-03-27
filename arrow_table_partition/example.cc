@@ -27,7 +27,16 @@ arrow::Status RunMain(std::string path) {
 
   auto aggregate_options = arrow::acero::AggregateNodeOptions(
       /*aggregates=*/{{"hash_list", nullptr, "species", "species_list"}},
-      {"homeworld"});
+      /*keys*/ {"homeworld"});
+
+  // Note: You can included more columns in the result by passing a vector of
+  // aggregates to AggregateNodeOptions, like this:
+  //
+  // auto aggregate_options = arrow::acero::AggregateNodeOptions(
+  //     /*aggregates=*/{{{"hash_list", nullptr, "species", "species_list"},
+  //                      {"hash_list", nullptr, "hair_color",
+  //                      "hair_color_list"}}},
+  //     {"homeworld"});
 
   // Then we create the plan
   auto plan = arrow::acero::Declaration::Sequence(
