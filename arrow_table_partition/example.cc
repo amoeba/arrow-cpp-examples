@@ -34,6 +34,15 @@ ConcatenateChunkedListArray(std::shared_ptr<arrow::ChunkedArray> chunked) {
   return result;
 }
 
+/// \brief Flatten a table that's been partitioned by hash_list
+///
+/// This takes care of a few details related to its input:
+///
+/// 1. Since hash_list produces a table where the key columns only have one
+/// value, this function replicates that value as many times as needed so it has
+/// the same length as the rest of the columns
+/// 2. Flattens each of the non-key columns
+/// 3. Creates a new, flat schema
 arrow::Result<std::shared_ptr<arrow::Table>>
 FlattenPartitionedTable(std::shared_ptr<arrow::Table> input) {
   std::vector<std::shared_ptr<arrow::Array>> arrays;
@@ -49,31 +58,24 @@ FlattenPartitionedTable(std::shared_ptr<arrow::Table> input) {
     arrays.push_back(std::move(array));
   }
 
-  // Handle first col, we need to duplicate its one value nrows times
-  auto nrows = arrays[0]->length();
+  // Handle first col, we need to duplicate its single value nrows times
+  auto ntimes = arrays[0]->length();
   ARROW_ASSIGN_OR_RAISE(auto single,
                         input->GetColumnByName("homeworld")->GetScalar(0));
 
   arrow::StringBuilder builder;
-  for (int i = 0; i < nrows; i++) {
+  for (int i = 0; i < ntimes; i++) {
     ARROW_RETURN_NOT_OK(builder.AppendScalar(*single));
   }
-  ARROW_ASSIGN_OR_RAISE(auto final, builder.Finish());
+  ARROW_ASSIGN_OR_RAISE(auto replicated, builder.Finish());
+  arrays.push_back(replicated);
 
-  arrays.push_back(final);
+  // Last, we need to build a new schema with just flat/primitive arrays
+  auto flat_schema = arrow::schema({arrow::field("species", arrow::utf8()),
+                                    arrow::field("name", arrow::utf8()),
+                                    arrow::field("homeworld", arrow::utf8())});
 
-  auto new_schema = arrow::schema({arrow::field("species", arrow::utf8()),
-                                   arrow::field("name", arrow::utf8()),
-                                   arrow::field("homeworld", arrow::utf8())});
-
-  auto x = arrow::Table::Make(std::move(new_schema), std::move(arrays));
-
-  if (x->ValidateFull().ok()) {
-    std::cout << "Valid!" << std::endl;
-  } else {
-    std::cout << "BOOM!" << x->ValidateFull().message() << std::endl;
-  }
-  return x;
+  return arrow::Table::Make(std::move(flat_schema), std::move(arrays));
 }
 
 arrow::Status RunMain(std::string path) {
@@ -109,8 +111,7 @@ arrow::Status RunMain(std::string path) {
   ARROW_ASSIGN_OR_RAISE(partitioned_table,
                         arrow::acero::DeclarationToTable(std::move(plan)));
 
-  // If we want, we can split the single Table into one Table per partition by
-  // taking k slices
+  // Convert the result into a map of partition<->Table
   std::unordered_map<std::string, std::shared_ptr<arrow::Table>> tables;
   auto n_partitions = partitioned_table->GetColumnByName("homeworld")->length();
   tables.reserve(n_partitions);
@@ -121,6 +122,7 @@ arrow::Status RunMain(std::string path) {
                           partitioned_table->GetColumnByName("homeworld")
                               ->chunk(0)
                               ->GetScalar(i));
+    // Flatten the slice and handle the key column
     ARROW_ASSIGN_OR_RAISE(auto flat, FlattenPartitionedTable(std::move(
                                          partitioned_table->Slice(i, 1))));
     tables.insert({key->ToString(), flat});

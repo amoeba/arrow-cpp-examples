@@ -48,6 +48,8 @@ keys: [["a"]]
 values_list: [[[1,2]]]
 ```
 
+This example goes one step further and flattens the last result.
+
 ## Pre-requisites
 
 - Modern C++ compiler toolchain
@@ -85,50 +87,53 @@ This uses the `starwars.parquet` file listed in pre-requisites.
 ```sh
 $ ./example starwars.parquet
 <<<...truncated...>>>
+species: string
+name: string
 homeworld: string
-species_list: list<item: string>
-  child 0, item: string
-name_list: list<item: string>
-  child 0, item: string
 ----
+species:
+  [
+    [
+      "Human",
+      "Droid",
+      "Human",
+      "Human",
+      "Human",
+      "Droid",
+      "Human",
+      "Human",
+      "Human",
+      "Human"
+    ]
+  ]
+name:
+  [
+    [
+      "Luke Skywalker",
+      "C-3PO",
+      "Darth Vader",
+      "Owen Lars",
+      "Beru Whitesun Lars",
+      "R5-D4",
+      "Biggs Darklighter",
+      "Anakin Skywalker",
+      "Shmi Skywalker",
+      "Cliegg Lars"
+    ]
+  ]
 homeworld:
   [
     [
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
       "Tatooine"
-    ]
-  ]
-species_list:
-  [
-    [
-      [
-        "Human",
-        "Droid",
-        "Human",
-        "Human",
-        "Human",
-        "Droid",
-        "Human",
-        "Human",
-        "Human",
-        "Human"
-      ]
-    ]
-  ]
-name_list:
-  [
-    [
-      [
-        "Luke Skywalker",
-        "C-3PO",
-        "Darth Vader",
-        "Owen Lars",
-        "Beru Whitesun Lars",
-        "R5-D4",
-        "Biggs Darklighter",
-        "Anakin Skywalker",
-        "Shmi Skywalker",
-        "Cliegg Lars"
-      ]
     ]
   ]
 ```
