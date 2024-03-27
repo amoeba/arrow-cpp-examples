@@ -18,6 +18,7 @@
 #include "arrow/type_fwd.h"
 #include "parquet/arrow/reader.h"
 
+/// \brief Concatenate a Chunked ListArray into a single primitive Array
 arrow::Result<std::shared_ptr<arrow::Array>>
 ConcatenateChunkedListArray(std::shared_ptr<arrow::ChunkedArray> chunked) {
   arrow::ArrayVector vec;
