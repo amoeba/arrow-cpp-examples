@@ -34,7 +34,7 @@ values_list: [[[1,2],[3,4],[5]]]
 - Modern C++ compiler toolchain
 - CMake
 - Likely a few system libraries, depending on your system
-- The data below is [starwars](https://dplyr.tidyverse.org/reference/starwars.html) from dplyr
+- starwars.parquet from dplyr, see [starwars](https://dplyr.tidyverse.org/reference/starwars.html)
   - To get a copy, run this R code:
 
       ```r
