@@ -34,6 +34,15 @@ values_list: [[[1,2],[3,4],[5]]]
 - Modern C++ compiler toolchain
 - CMake
 - Likely a few system libraries, depending on your system
+- The data below is [starwars](https://dplyr.tidyverse.org/reference/starwars.html) from dplyr
+  - To get a copy, run this R code:
+
+      ```r
+      library(arrow)
+      library(dplyr)
+
+      write_parquet(arrow_table(starwars), "starwars.parquet")
+      ```
 
 ## Building
 
