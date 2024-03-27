@@ -23,7 +23,7 @@ arrow::Status RunMain(std::string path) {
   // Make our plan
   // It reads cleaner to set up options separately first, so we do that
   auto table_source_options =
-      arrow::acero::TableSourceNodeOptions{std::move(table), 1024};
+      arrow::acero::TableSourceNodeOptions{std::move(table)};
 
   auto aggregate_options = arrow::acero::AggregateNodeOptions(
       /*aggregates=*/{{"hash_list", nullptr, "species", "species_list"}},
