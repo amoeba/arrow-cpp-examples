@@ -108,8 +108,7 @@ arrow::Status RunMain(std::string path) {
        {"aggregate", std::move(aggregate_options)}});
 
   // Collect the result as a Table
-  std::shared_ptr<arrow::Table> partitioned_table;
-  ARROW_ASSIGN_OR_RAISE(partitioned_table,
+  ARROW_ASSIGN_OR_RAISE(auto partitioned_table,
                         arrow::acero::DeclarationToTable(std::move(plan)));
 
   // Convert the result into a map of partition<->Table
