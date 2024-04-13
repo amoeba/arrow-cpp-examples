@@ -18,65 +18,82 @@
 #include "arrow/type_fwd.h"
 #include "parquet/arrow/reader.h"
 
-/// \brief Concatenate a Chunked ListArray into a single primitive Array
-arrow::Result<std::shared_ptr<arrow::Array>>
-ConcatenateChunkedListArray(std::shared_ptr<arrow::ChunkedArray> chunked) {
-  arrow::ArrayVector vec;
-
-  for (int i = 0; i < chunked->num_chunks(); i++) {
-    ARROW_ASSIGN_OR_RAISE(
-        auto flattened,
-        arrow::compute::CallFunction("list_flatten", {chunked->chunk(i)}));
-    vec.push_back(flattened.make_array());
-  }
-
-  ARROW_ASSIGN_OR_RAISE(auto result, arrow::Concatenate(vec));
-
-  return result;
-}
-
-/// \brief Flatten a table that's been partitioned by hash_list
-///
-/// This takes care of a few details related to its input:
-///
-/// 1. Since hash_list produces a table where the key columns only have one
-/// value, this function replicates that value as many times as needed so it has
-/// the same length as the rest of the columns
-/// 2. Flattens each of the non-key columns
-/// 3. Creates a new, flat schema
+/// \brief Process a single partition slice from our larger Table
+//
+// At this stage, our slice looks like the below, with the homeworld column
+// only having a single value and each list column only have a single element.
+//
+// homeworld: string
+// species_list: list<item: string>
+//   child 0, item: string
+// name_list: list<item: string>
+//   child 0, item: string
+// ----
+// homeworld:
+//   [
+//     [
+//       "Tatooine" <-- always a single value
+//     ]
+//   ]
+// species_list:
+//   [
+//     [
+//       [
+//         "Human",
+//         "Droid",
+//         etc...
+//       ]
+//     ]
+//   ]
+// name_list:
+//   [
+//     [
+//       [
+//         "Luke Skywalker",
+//         "C-3PO",
+//         etc...
+//       ]
+//     ]
+//   ]
 arrow::Result<std::shared_ptr<arrow::Table>>
-FlattenPartitionedTable(std::shared_ptr<arrow::Table> input) {
-  std::vector<std::shared_ptr<arrow::Array>> arrays;
-  arrays.reserve(input->num_columns());
+ProcessTableSlice(std::shared_ptr<arrow::Table> input) {
+  // These next two statements are a pretty useful trick and we use it to
+  // essentially explode a single value into as many as we need.
+  //
+  // Since homeworld column is only a single value, we need to replicate it
+  // enough times so it has the same number of values as the other columns. We
+  // could do this manually by building an Array but we can also take advantage
+  // of the fact that the other columns are lists with only a single child so
+  // all values are at offset zero. So calling list_parent_indices on a column
+  // like name_list returns the correct number of zeroes and we can then call
+  // take on those indices to get our replicated values.
+  ARROW_ASSIGN_OR_RAISE(
+      auto indices,
+      arrow::compute::CallFunction("list_parent_indices",
+                                   {input->GetColumnByName("name_list")}));
+  ARROW_ASSIGN_OR_RAISE(
+      auto homeworld,
+      arrow::compute::Take(input->GetColumnByName("homeworld"), indices));
 
-  // Handle rest, assuming index 1 and higher are the rest
-  for (int i = 1; i < input->num_columns(); i++) {
-    ARROW_ASSIGN_OR_RAISE(
-        auto array, ConcatenateChunkedListArray(std::move(input->column(i))));
+  // For the other columns we can just flatten them
+  ARROW_ASSIGN_OR_RAISE(
+      auto species,
+      arrow::compute::CallFunction("list_flatten",
+                                   {input->GetColumnByName("species_list")}));
+  ARROW_ASSIGN_OR_RAISE(
+      auto names, arrow::compute::CallFunction(
+                      "list_flatten", {input->GetColumnByName("name_list")}));
 
-    std::cout << array->ToString() << std::endl;
+  // Create our schema
+  auto schema = arrow::schema({
+      arrow::field("homeworld", arrow::utf8()),
+      arrow::field("species", arrow::utf8()),
+      arrow::field("name", arrow::utf8()),
+  });
 
-    arrays.push_back(std::move(array));
-  }
-
-  // Handle first col, we need to duplicate its single value nrows times
-  auto ntimes = arrays[0]->length();
-  ARROW_ASSIGN_OR_RAISE(auto single,
-                        input->GetColumnByName("homeworld")->GetScalar(0));
-
-  arrow::StringBuilder builder;
-  for (int i = 0; i < ntimes; i++) {
-    ARROW_RETURN_NOT_OK(builder.AppendScalar(*single));
-  }
-  ARROW_ASSIGN_OR_RAISE(auto replicated, builder.Finish());
-  arrays.push_back(replicated);
-
-  // Last, we need to build a new schema with just flat/primitive arrays
-  auto flat_schema = arrow::schema({arrow::field("species", arrow::utf8()),
-                                    arrow::field("name", arrow::utf8()),
-                                    arrow::field("homeworld", arrow::utf8())});
-
-  return arrow::Table::Make(std::move(flat_schema), std::move(arrays));
+  return arrow::Table::Make(std::move(schema),
+                            {homeworld.chunked_array(), species.chunked_array(),
+                             names.chunked_array()});
 }
 
 arrow::Status RunMain(std::string path) {
@@ -122,14 +139,17 @@ arrow::Status RunMain(std::string path) {
                           partitioned_table->GetColumnByName("homeworld")
                               ->chunk(0)
                               ->GetScalar(i));
+
     // Flatten the slice and handle the key column
-    ARROW_ASSIGN_OR_RAISE(auto flat, FlattenPartitionedTable(std::move(
+    ARROW_ASSIGN_OR_RAISE(auto flat, ProcessTableSlice(std::move(
                                          partitioned_table->Slice(i, 1))));
+
     tables.insert({key->ToString(), flat});
   }
 
   // Print out our results
   for (auto iter = tables.begin(); iter != tables.end(); ++iter) {
+    std::cout << iter->first << std::endl;
     std::cout << iter->second->ToString() << std::endl;
   }
 
