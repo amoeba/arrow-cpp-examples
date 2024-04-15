@@ -2,7 +2,7 @@
 
 Example of partitioning a Table by unique values in a column and slicing that result into one table per partition.
 
-This is basically the C++ equivalent of this type of PyArrow code:
+The core of the logic in the C++ code can be expressed with PyArrow as:
 
 ```python
 import pyarrow as pa
@@ -33,7 +33,8 @@ values_list: [[[1,2],[3,4],[5]]]
 And then slicing the result to get a single Table as a partition:
 
 ```python
-out.slice(0, 1)
+single = out.slice(0, 1)
+single
 ```
 
 Which prints:
@@ -48,7 +49,19 @@ keys: [["a"]]
 values_list: [[[1,2]]]
 ```
 
-This example goes one step further and flattens the last result.
+The example C++ code goes one step further and flattens the sliced Table.
+
+```python
+indices = pc.list_parent_indices(single.column("values_list"))
+keys = pc.take(single.column("keys"), indices)
+values = pc.list_flatten(single.column("values_list"))
+
+flattened = pa.Table.from_arrays([keys, values], names=["keys", "values"])
+flattened.to_pandas()
+###   keys  values
+### 0    a       1
+### 1    a       2
+```
 
 ## Pre-requisites
 
@@ -56,14 +69,15 @@ This example goes one step further and flattens the last result.
 - CMake
 - Likely a few system libraries, depending on your system
 - starwars.parquet from dplyr, see [starwars](https://dplyr.tidyverse.org/reference/starwars.html)
+
   - To get a copy, run this R code:
 
-      ```r
-      library(arrow)
-      library(dplyr)
+    ```r
+    library(arrow)
+    library(dplyr)
 
-      write_parquet(arrow_table(starwars), "starwars.parquet")
-      ```
+    write_parquet(arrow_table(starwars), "starwars.parquet")
+    ```
 
 ## Building
 
@@ -87,10 +101,26 @@ This uses the `starwars.parquet` file listed in pre-requisites.
 ```sh
 $ ./example starwars.parquet
 <<<...truncated...>>>
+Tatooine
+homeworld: string
 species: string
 name: string
-homeworld: string
 ----
+homeworld:
+  [
+    [
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine",
+      "Tatooine"
+    ]
+  ]
 species:
   [
     [
@@ -119,21 +149,6 @@ name:
       "Anakin Skywalker",
       "Shmi Skywalker",
       "Cliegg Lars"
-    ]
-  ]
-homeworld:
-  [
-    [
-      "Tatooine",
-      "Tatooine",
-      "Tatooine",
-      "Tatooine",
-      "Tatooine",
-      "Tatooine",
-      "Tatooine",
-      "Tatooine",
-      "Tatooine",
-      "Tatooine"
     ]
   ]
 ```
