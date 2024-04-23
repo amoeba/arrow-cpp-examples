@@ -2,6 +2,11 @@
 
 Example of partitioning a Table by unique values in a column and slicing that result into one table per partition.
 
+Also includes an example of partitioning a Partitioning from the Datasets API, see ./example_batch_partitioning.cc.
+The remainder of this README is for the original example, ./example.cc.
+
+## Summary
+
 The core of the logic in the C++ code can be expressed with PyArrow as:
 
 ```python

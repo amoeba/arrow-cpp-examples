@@ -48,3 +48,11 @@ target_link_libraries(example
   arrow_shared
   arrow_acero_shared
   parquet_static)
+
+add_executable(example_batch_partitioning example_batch_partitioning.cc)
+target_link_libraries(example_batch_partitioning
+  PRIVATE
+  arrow_shared
+  arrow_dataset_shared
+  arrow_acero_shared
+  parquet_static)
